@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -30,7 +29,7 @@ public class PageRank {
                 }
       } 
    
-   public static class LongSumReducer extends Reducer<Text, Text, Text, Text> {
+   public static class ListReducer extends Reducer<Text, Text, Text, Text> {
 
       public void reduce(Text key, Text values, Context context)
             throws IOException, InterruptedException {
@@ -44,10 +43,10 @@ public class PageRank {
       Job job = Job.getInstance(conf, "word count");
       job.setJarByClass(PageRank.class);
       job.setMapperClass(TokenizerMapper.class);
-      job.setCombinerClass(LongSumReducer.class);
-      job.setReducerClass(LongSumReducer.class);
+      job.setCombinerClass(ListReducer.class);
+      job.setReducerClass(ListReducer.class);
       job.setOutputKeyClass(Text.class);
-      job.setOutputValueClass(LongWritable.class);
+      job.setOutputValueClass(Text.class);
       FileInputFormat.addInputPath(job, new Path(args[0]));
       FileOutputFormat.setOutputPath(job, new Path(args[1]));
       System.exit(job.waitForCompletion(true) ? 0 : 1);
