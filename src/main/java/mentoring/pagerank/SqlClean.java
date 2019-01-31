@@ -1,10 +1,13 @@
 package mentoring.pagerank;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -27,16 +30,19 @@ public class SqlClean extends Configured implements Tool {
 
 	public static class SqlMapper extends Mapper<Object, Text, Text, Text> {
 		
-		Map<Integer, String> nsAndTitle = new HashMap<>();
+		Map<String, String> nsAndTitle = new HashMap<>();
 		
 		@Override
 		public void setup(Context context) throws IOException{
-			BufferedReader in = new BufferedReader(new FileReader(context.getCacheFiles()[0].toString()));
+			//BufferedReader in = new BufferedReader(new FileReader(context.getCacheFiles()[0].toString()));
+			File ns_file = new File("nsfile");
+			FileInputStream fis = new FileInputStream(ns_file);
+			BufferedReader nsdata = new BufferedReader(new InputStreamReader(fis));
 			
-			for (String line : IOUtils.readLines(in)) {
+			for (String line : IOUtils.readLines(nsdata)) {
 				String[] split = line.split("\t");
-				int ns = Integer.parseInt(split[1]);
-				String title = split[2];
+				String ns = split[0];
+				String title = split[1];
 				nsAndTitle.put(ns, title);
 			}
 		}
@@ -52,7 +58,7 @@ public class SqlClean extends Configured implements Tool {
 			String newTitle = null;
 
 			String preTitle = nsAndTitle.get(nameSpace);
-			if (preTitle.isEmpty()) {
+			if (preTitle == null) {
 				newTitle = title;
 			} else {
 				newTitle = preTitle + ":" + title;
@@ -86,7 +92,7 @@ public class SqlClean extends Configured implements Tool {
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
-		job.addCacheFile(new Path(args[2]).toUri());
+		job.addCacheFile(new URI("/user/mentee/input/namespace.txt#nsfile"));
 
 		return job.waitForCompletion(true) ? 0 : 1;
 	}
