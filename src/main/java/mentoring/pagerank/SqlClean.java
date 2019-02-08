@@ -3,14 +3,11 @@ package mentoring.pagerank;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,36 +26,39 @@ import org.apache.hadoop.util.ToolRunner;
 public class SqlClean extends Configured implements Tool {
 
 	public static class SqlMapper extends Mapper<Object, Text, Text, Text> {
-		
+
 		Map<String, String> nsAndTitle = new HashMap<>();
-		
+		private Text newId = new Text();
+		private Text newTitle = new Text();
+
 		@Override
-		public void setup(Context context) throws IOException{
-			//BufferedReader in = new BufferedReader(new FileReader(context.getCacheFiles()[0].toString()));
+		public void setup(Context context) throws IOException {
+			// BufferedReader in = new BufferedReader(new
+			// FileReader(context.getCacheFiles()[0].toString()));
 			File ns_file = new File("nsfile");
 			FileInputStream fis = new FileInputStream(ns_file);
 			BufferedReader nsdata = new BufferedReader(new InputStreamReader(fis));
-			
+
 			for (String line : IOUtils.readLines(nsdata)) {
 				String[] split = line.split("\t");
 				String ns = split[0];
-				String title = split[1];
-				nsAndTitle.put(ns, title);
+				String nsname = split[1];
+				nsAndTitle.put(ns, nsname);
 			}
 		}
-		
-		
+
 		@Override
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			String[] parts = StringUtils.splitPreserveAllTokens(value.toString(), "\t");
 
 			String id = parts[0];
-			String nameSpace = parts[1];
-			String title = parts[2];
+			String title = parts[1];
+			String nameSpace = parts[2];
 			String newTitle = null;
 
 			String preTitle = nsAndTitle.get(nameSpace);
-			if (preTitle == null) {
+			
+			if (preTitle.equals(" ")) {
 				newTitle = title;
 			} else {
 				newTitle = preTitle + ":" + title;
@@ -69,8 +69,10 @@ public class SqlClean extends Configured implements Tool {
 
 	public static class ListReducer extends Reducer<Text, Text, Text, Text> {
 
-		public void reduce(Text key, Text values, Context context) throws IOException, InterruptedException {
-			context.write(key, values);
+		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+			for (Text value : values) {
+				context.write(key, value);
+			}
 		}
 	}
 
