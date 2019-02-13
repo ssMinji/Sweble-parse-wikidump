@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
 encoding//src/main/java=UTF-8
-encoding//src/main/java/step01/datacleansing/Xmlparser.java=UTF-8
+encoding//src/main/java/step01/datacleansing/SwebleApp.java=UTF-8
+encoding//src/main/java/step01/datacleansing/SwebleParse.java=UTF-8
 encoding/<project>=UTF-8
