@@ -92,7 +92,7 @@ public class BodyPRJoin {
 			for (Text value : values) {
 				String parts[] = StringUtils.splitPreserveAllTokens(value.toString(), "\t");
 
-				if(!parts[0].equals("null")) {
+				if(!parts[0].equals(null)) {
 					if (parts[0].equals("body")) {
 						data = parts[1];
 					} else if (parts[0].equals("PRscore")) {
@@ -103,16 +103,22 @@ public class BodyPRJoin {
 				}
 			}
 			
-			Gson gson = new Gson();
-			DataDTO jsonData = gson.fromJson(data, DataDTO.class);
-			String title = jsonData.getTitle();
-			String descrip = jsonData.getDescrip();
+			if (data != null) {
+				context.write(new Text(data), new Text(score));
+			}
 			
-			WikiDTO w = new WikiDTO();
-			w.setTitle(title);
-			w.setDescrip(descrip);
-			w.setScore(score);
-			String finalData = gson.toJson(w);
+//			Gson gson = new Gson();
+//			DataDTO jsonData = gson.fromJson(data, DataDTO.class);
+//			String title = jsonData.getTitle();
+//			String descrip = jsonData.getDescrip();
+//			
+//			WikiDTO w = new WikiDTO();
+//			w.setTitle(title);
+//			w.setDescrip(descrip);
+//			w.setScore(score);
+//			String finalData = gson.toJson(w);
+			
+			
 		}
 	}
 
